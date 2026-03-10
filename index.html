@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mantenimiento Montacargas</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #111318;
+  --surface: #1a1d26;
+  --card: #20242f;
+  --border: #2d3245;
+  --accent: #f59e0b;
+  --accent2: #ef4444;
+  --blue: #3b82f6;
+  --green: #22c55e;
+  --text: #f0f2f8;
+  --muted: #64748b;
+  --sub: #94a3b8;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Barlow', sans-serif;
+  min-height: 100vh;
+  background-image:
+    radial-gradient(ellipse at top left, rgba(245,158,11,0.07) 0%, transparent 50%),
+    radial-gradient(ellipse at bottom right, rgba(239,68,68,0.05) 0%, transparent 50%);
+}
+
+/* HEADER */
+.header {
+  background: var(--surface);
+  border-bottom: 3px solid var(--accent);
+  padding: 0 24px;
+  display: flex;
+  align-items: stretch;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 4px 30px rgba(0,0,0,0.5);
+}
+
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 0;
+  flex: 1;
+}
+
+.header-logo {
+  width: 48px; height: 48px;
+  background: linear-gradient(135deg, var(--accent), #d97706);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 26px;
+  box-shadow: 0 4px 16px rgba(245,158,11,0.3);
+}
+
+.header-text h1 {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  color: var(--accent);
+  line-height: 1;
+}
+
+.header-text p {
+  font-size: 12px;
+  color: var(--muted);
+  letter-spacing: 0.5px;
+  margin-top: 3px;
+}
+
+.header-counter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 24px;
+  border-left: 1px solid var(--border);
+}
+
+.counter-num {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 38px;
+  font-weight: 800;
+  color: var(--accent);
+  line-height: 1;
+}
+
+.counter-label {
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  line-height: 1.4;
+}
+
+/* MAIN */
+main { max-width: 700px; margin: 32px auto; padding: 0 16px 100px; }
+
+/* SECTION DIVIDER */
+.section-label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 28px 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.section-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* CARD */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 28px;
+  animation: fadeUp 0.3s ease;
+}
+
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(16px); }
+  to { opacity:1; transform:translateY(0); }
+}
+
+/* FIELDS */
+.field { margin-bottom: 18px; }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+@media(max-width:540px){ .row2,.row3 { grid-template-columns:1fr; } }
+
+label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--sub);
+  margin-bottom: 7px;
+}
+label .req { color: var(--accent); }
+
+select, input[type="date"], input[type="time"], input[type="text"], textarea {
+  width: 100%;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 11px 14px;
+  color: var(--text);
+  font-family: 'Barlow', sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  -webkit-appearance: none;
+}
+
+select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2364748b'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 38px;
+  cursor: pointer;
+}
+
+select:focus, input:focus, textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(245,158,11,0.15);
+}
+
+textarea {
+  resize: vertical;
+  min-height: 90px;
+  line-height: 1.6;
+}
+
+/* CONDITIONAL BLOCK */
+.conditional-block {
+  display: none;
+  animation: fadeUp 0.25s ease;
+}
+.conditional-block.show { display: block; }
+
+/* TYPE PILLS */
+.type-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 14px;
+  border-radius: 99px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  margin-bottom: 16px;
+}
+.type-prev { background: rgba(59,130,246,0.15); color: #60a5fa; border: 1px solid rgba(59,130,246,0.3); }
+.type-corr { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
+
+/* DATETIME GROUP */
+.datetime-group {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px;
+  margin-bottom: 18px;
+}
+.datetime-group-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.dt-in { color: var(--green); }
+.dt-out { color: var(--accent2); }
+
+/* PHOTO ZONE */
+.photo-zone {
+  border: 2px dashed var(--border);
+  border-radius: 12px;
+  min-height: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+.photo-zone:hover { border-color: var(--accent); background: rgba(245,158,11,0.04); }
+.photo-zone.filled { border-style: solid; border-color: var(--accent); min-height: auto; }
+
+.photo-zone input[type="file"] {
+  position: absolute; inset: 0;
+  opacity: 0; cursor: pointer;
+  width: 100%; height: 100%;
+  z-index: 2;
+}
+
+.photo-placeholder {
+  text-align: center;
+  pointer-events: none;
+  padding: 20px;
+}
+.photo-placeholder .ico { font-size: 32px; margin-bottom: 8px; }
+.photo-placeholder p { color: var(--muted); font-size: 13px; line-height: 1.5; }
+.photo-placeholder strong { color: var(--accent); }
+
+#preview-wrap { display: none; position: relative; width: 100%; }
+#preview-wrap.show { display: block; }
+#photo-prev {
+  width: 100%;
+  max-height: 280px;
+  object-fit: cover;
+  border-radius: 10px;
+  display: block;
+}
+.wm-badge {
+  position: absolute; bottom: 10px; right: 10px;
+  background: rgba(0,0,0,0.75);
+  color: var(--accent);
+  font-size: 11px; font-weight: 700;
+  padding: 4px 12px; border-radius: 99px;
+  letter-spacing: 0.5px;
+  pointer-events: none;
+}
+.rm-photo {
+  position: absolute; top: 10px; right: 10px;
+  background: rgba(0,0,0,0.7);
+  border: none; color: #fff;
+  width: 30px; height: 30px; border-radius: 50%;
+  cursor: pointer; font-size: 15px;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.2s; z-index: 3;
+}
+.rm-photo:hover { background: var(--accent2); }
+
+/* ACTIONS */
+.form-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+.btn {
+  padding: 11px 26px;
+  border-radius: 10px;
+  font-family: 'Barlow', sans-serif;
+  font-size: 14px; font-weight: 700;
+  cursor: pointer; border: none;
+  transition: all 0.2s;
+  letter-spacing: 0.3px;
+}
+.btn-ghost {
+  background: transparent;
+  border: 1.5px solid var(--border);
+  color: var(--muted);
+}
+.btn-ghost:hover { border-color: var(--sub); color: var(--text); }
+
+.btn-save {
+  background: linear-gradient(135deg, var(--accent), #d97706);
+  color: #000; font-weight: 800;
+  box-shadow: 0 4px 16px rgba(245,158,11,0.25);
+}
+.btn-save:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(245,158,11,0.35); }
+.btn-save:active { transform: translateY(0); }
+
+.btn-send {
+  background: linear-gradient(135deg, var(--green), #16a34a);
+  color: #000; font-weight: 800;
+  box-shadow: 0 4px 16px rgba(34,197,94,0.25);
+}
+.btn-send:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(34,197,94,0.35); }
+
+/* RECORDS */
+.records-wrap { margin-top: 8px; }
+
+.record-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 18px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  animation: fadeUp 0.25s ease;
+  transition: border-color 0.2s;
+}
+.record-card:hover { border-color: var(--accent); }
+.record-card.prev { border-left: 3px solid var(--blue); }
+.record-card.corr { border-left: 3px solid var(--accent2); }
+
+.rec-num {
+  width: 36px; height: 36px;
+  background: var(--card);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 16px; font-weight: 800;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+.rec-info { flex: 1; min-width: 0; }
+.rec-info strong { font-size: 15px; font-weight: 600; display: block; }
+.rec-info span { font-size: 12px; color: var(--muted); display: block; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.rec-badge {
+  font-size: 11px; font-weight: 700;
+  padding: 3px 10px; border-radius: 99px;
+  flex-shrink: 0;
+}
+.badge-prev { background: rgba(59,130,246,0.15); color: #60a5fa; }
+.badge-corr { background: rgba(239,68,68,0.15); color: #f87171; }
+
+.rec-thumb {
+  width: 44px; height: 44px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.no-thumb {
+  width: 44px; height: 44px;
+  border-radius: 8px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; flex-shrink: 0;
+  color: var(--muted);
+}
+
+.rec-del {
+  background: none; border: none;
+  color: var(--muted); cursor: pointer;
+  font-size: 18px; padding: 6px;
+  transition: color 0.2s; flex-shrink: 0;
+}
+.rec-del:hover { color: var(--accent2); }
+
+.empty-state {
+  text-align: center;
+  padding: 36px;
+  color: var(--muted);
+  font-size: 14px;
+  border: 1.5px dashed var(--border);
+  border-radius: 12px;
+}
+
+/* SUBMIT BAR */
+.submit-bar {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 24px;
+  display: none;
+}
+.submit-bar.show { display: flex; }
+.submit-bar-info strong { font-size: 16px; font-weight: 600; }
+.submit-bar-info p { font-size: 13px; color: var(--muted); margin-top: 2px; }
+
+/* SUCCESS */
+#success {
+  display: none;
+  text-align: center;
+  padding: 80px 20px;
+  animation: fadeUp 0.4s ease;
+}
+#success.show { display: block; }
+.success-icon { font-size: 72px; margin-bottom: 20px; }
+#success h2 {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 42px; font-weight: 800;
+  letter-spacing: 2px;
+  color: var(--green);
+  margin-bottom: 8px;
+}
+#success p { color: var(--muted); font-size: 15px; }
+
+/* TOAST */
+.toast {
+  position: fixed; bottom: 24px; left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  padding: 12px 24px;
+  border-radius: 10px;
+  font-weight: 700; font-size: 14px;
+  transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+  z-index: 999; pointer-events: none;
+  white-space: nowrap;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+canvas { display: none; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-brand">
+    <div class="header-logo">🏗️</div>
+    <div class="header-text">
+      <h1>CONTROL DE MANTENIMIENTO</h1>
+      <p>Montacargas · Registro de entrada y salida de taller</p>
+    </div>
+  </div>
+  <div class="header-counter">
+    <div class="counter-num" id="hdr-count">0</div>
+    <div class="counter-label">Registros<br>guardados</div>
+  </div>
+</div>
+
+<main>
+
+  <!-- FORM -->
+  <div class="card" id="form-card">
+
+    <div class="section-label">Identificación del equipo</div>
+
+    <div class="row2">
+      <div class="field">
+        <label>Montacargas <span class="req">*</span></label>
+        <select id="montacargas">
+          <option value="">— Seleccionar —</option>
+          <option>561</option>
+          <option>562</option>
+          <option>567</option>
+          <option>603</option>
+          <option>681</option>
+          <option>761</option>
+          <option>832</option>
+          <option>855</option>
+          <option>860</option>
+          <option>838</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Tipo de mantenimiento <span class="req">*</span></label>
+        <select id="tipo" onchange="onTipoChange()">
+          <option value="">— Seleccionar —</option>
+          <option value="preventivo">Preventivo</option>
+          <option value="correctivo">Correctivo</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- PREVENTIVO -->
+    <div class="conditional-block" id="bloque-prev">
+      <div class="type-indicator type-prev">🔵 PREVENTIVO</div>
+      <div class="field">
+        <label>Plan de mantenimiento <span class="req">*</span></label>
+        <select id="plan-prev">
+          <option value="">— Seleccionar —</option>
+          <option>250 horas</option>
+          <option>1000 horas</option>
+          <option>2000 horas</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- CORRECTIVO -->
+    <div class="conditional-block" id="bloque-corr">
+      <div class="type-indicator type-corr">🔴 CORRECTIVO</div>
+      <div class="field">
+        <label>Sistema afectado <span class="req">*</span></label>
+        <select id="sistema-corr">
+          <option value="">— Seleccionar —</option>
+          <option>Hidráulico</option>
+          <option>Mecánico</option>
+          <option>Eléctrico</option>
+          <option>Seguridad</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- FECHAS Y HORAS -->
+    <div class="section-label">Tiempos en taller</div>
+
+    <div class="datetime-group">
+      <div class="datetime-group-title dt-in">⬇️ ENTRADA AL TALLER</div>
+      <div class="row2">
+        <div class="field" style="margin-bottom:0">
+          <label>Fecha entrada <span class="req">*</span></label>
+          <input type="date" id="fecha-entrada">
+        </div>
+        <div class="field" style="margin-bottom:0">
+          <label>Hora entrada <span class="req">*</span></label>
+          <input type="time" id="hora-entrada">
+        </div>
+      </div>
+    </div>
+
+    <div class="datetime-group">
+      <div class="datetime-group-title dt-out">⬆️ SALIDA DEL TALLER</div>
+      <div class="row2">
+        <div class="field" style="margin-bottom:0">
+          <label>Fecha salida</label>
+          <input type="date" id="fecha-salida">
+        </div>
+        <div class="field" style="margin-bottom:0">
+          <label>Hora salida</label>
+          <input type="time" id="hora-salida">
+        </div>
+      </div>
+    </div>
+
+    <!-- OBSERVACIONES -->
+    <div class="section-label">Observaciones y evidencia</div>
+
+    <div class="field">
+      <label>Observaciones</label>
+      <textarea id="observaciones" placeholder="Describe el trabajo realizado, hallazgos, repuestos usados, recomendaciones..."></textarea>
+    </div>
+
+    <!-- FOTO -->
+    <div class="field">
+      <label>Foto de evidencia <span style="color:var(--accent);font-weight:400;text-transform:none;letter-spacing:0;">(marca de agua automática)</span></label>
+      <div class="photo-zone" id="photo-zone">
+        <input type="file" id="photo-input" accept="image/*" capture="environment">
+        <div class="photo-placeholder" id="photo-ph">
+          <div class="ico">📷</div>
+          <p>Toca para <strong>tomar o subir foto</strong><br>
+          <span style="font-size:12px;color:var(--muted)">Se aplicará marca de agua con datos del registro</span></p>
+        </div>
+        <div id="preview-wrap">
+          <img id="photo-prev" alt="Evidencia">
+          <div class="wm-badge">✓ Marca de agua aplicada</div>
+          <button class="rm-photo" id="rm-photo" type="button" onclick="removePhoto(event)">✕</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button class="btn btn-ghost" onclick="clearForm()">Limpiar</button>
+      <button class="btn btn-save" onclick="saveRecord()">Guardar registro →</button>
+    </div>
+  </div>
+
+  <!-- RECORDS -->
+  <div class="section-label" style="margin-top:32px;">Registros guardados</div>
+  <div class="records-wrap" id="records-list">
+    <div class="empty-state">Aún no hay registros guardados.<br>Completa el formulario y presiona <strong>Guardar registro</strong>.</div>
+  </div>
+
+  <!-- SUBMIT BAR -->
+  <div class="submit-bar" id="submit-bar">
+    <div class="submit-bar-info">
+      <strong>¿Listo para enviar?</strong>
+      <p id="submit-desc">Todos los registros serán enviados juntos.</p>
+    </div>
+    <button class="btn btn-send" onclick="sendAll()">📤 Enviar todo</button>
+  </div>
+
+  <!-- SUCCESS -->
+  <div id="success">
+    <div class="success-icon">✅</div>
+    <h2>¡ENVIADO!</h2>
+    <p id="success-desc">Registros enviados correctamente.</p>
+    <button class="btn btn-save" style="margin-top:28px;" onclick="resetAll()">+ Nuevo turno</button>
+  </div>
+
+</main>
+
+<div class="toast" id="toast"></div>
+<canvas id="wm-canvas"></canvas>
+
+<script>
+// ── CONFIG ─────────────────────────────────────────────
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzFTzAe5TSp0Jdd-fUZbh0UVyzPfuvpOjiwyqz0MXRLhfoPutQEoBbQOc5Y-Jder7w/exec";
+// ────────────────────────────────────────────────────────
+
+const records = [];
+let photoDataUrl = null;
+
+// Set defaults
+const now = new Date();
+document.getElementById('fecha-entrada').valueAsDate = now;
+document.getElementById('hora-entrada').value = now.toTimeString().slice(0,5);
+
+// ── TIPO CHANGE ─────────────────────────────────────────
+function onTipoChange() {
+  const v = document.getElementById('tipo').value;
+  document.getElementById('bloque-prev').classList.toggle('show', v === 'preventivo');
+  document.getElementById('bloque-corr').classList.toggle('show', v === 'correctivo');
+  // Reset sub-selects
+  document.getElementById('plan-prev').value = '';
+  document.getElementById('sistema-corr').value = '';
+}
+
+// ── PHOTO ───────────────────────────────────────────────
+document.getElementById('photo-input').addEventListener('change', e => {
+  const f = e.target.files[0];
+  if (!f) return;
+  const reader = new FileReader();
+  reader.onload = ev => applyWatermark(ev.target.result);
+  reader.readAsDataURL(f);
+});
+
+function removePhoto(e) {
+  e.stopPropagation();
+  photoDataUrl = null;
+  document.getElementById('photo-input').value = '';
+  document.getElementById('photo-ph').style.display = '';
+  document.getElementById('preview-wrap').classList.remove('show');
+  document.getElementById('photo-zone').classList.remove('filled');
+}
+
+function applyWatermark(src) {
+  const canvas = document.getElementById('wm-canvas');
+  const ctx = canvas.getContext('2d');
+  const img = new Image();
+  img.onload = () => {
+    canvas.width = img.width;
+    canvas.height = img.height;
+    ctx.drawImage(img, 0, 0);
+
+    const mc   = document.getElementById('montacargas').value || 'MC-???';
+    const tipo = (document.getElementById('tipo').value || 'MANT').toUpperCase();
+    const fe   = document.getElementById('fecha-entrada').value || '';
+    const he   = document.getElementById('hora-entrada').value || '';
+    const fs   = document.getElementById('fecha-salida').value || '';
+    const hs   = document.getElementById('hora-salida').value || '';
+
+    const fs1  = Math.max(16, img.width * 0.02);
+    const pad  = 14;
+    const barH = fs1 * 3.2;
+
+    // Bottom dark bar
+    ctx.fillStyle = 'rgba(0,0,0,0.72)';
+    ctx.fillRect(0, img.height - barH, img.width, barH);
+
+    // Line 1 — title
+    ctx.font = `bold ${fs1}px Arial`;
+    ctx.fillStyle = '#f59e0b';
+    ctx.textAlign = 'left';
+    ctx.fillText(`⚙ MONTACARGAS ${mc} · ${tipo}`, pad, img.height - barH + fs1 * 1.15);
+
+    // Line 2 — times
+    ctx.font = `${fs1 * 0.78}px Arial`;
+    ctx.fillStyle = '#ffffff';
+    const entradaStr = fe ? `Entrada: ${fe} ${he}` : '';
+    const salidaStr  = fs ? `  |  Salida: ${fs} ${hs}` : '';
+    ctx.fillText(entradaStr + salidaStr, pad, img.height - barH + fs1 * 2.4);
+
+    // Diagonal watermark
+    ctx.save();
+    ctx.translate(img.width / 2, img.height / 2);
+    ctx.rotate(-Math.PI / 6);
+    ctx.font = `bold ${fs1 * 2}px Arial`;
+    ctx.fillStyle = 'rgba(245,158,11,0.1)';
+    ctx.textAlign = 'center';
+    ctx.fillText('EVIDENCIA OFICIAL', 0, 0);
+    ctx.restore();
+
+    photoDataUrl = canvas.toDataURL('image/jpeg', 0.92);
+    document.getElementById('photo-prev').src = photoDataUrl;
+    document.getElementById('photo-ph').style.display = 'none';
+    document.getElementById('preview-wrap').classList.add('show');
+    document.getElementById('photo-zone').classList.add('filled');
+  };
+  img.src = src;
+}
+
+// ── SAVE RECORD ─────────────────────────────────────────
+function saveRecord() {
+  const mc       = document.getElementById('montacargas').value;
+  const tipo     = document.getElementById('tipo').value;
+  const feIn     = document.getElementById('fecha-entrada').value;
+  const heIn     = document.getElementById('hora-entrada').value;
+
+  if (!mc)   { toast('⚠ Selecciona el montacargas', '#ef4444'); return; }
+  if (!tipo) { toast('⚠ Selecciona el tipo de mantenimiento', '#ef4444'); return; }
+
+  if (tipo === 'preventivo' && !document.getElementById('plan-prev').value) {
+    toast('⚠ Selecciona el plan de mantenimiento', '#ef4444'); return;
+  }
+  if (tipo === 'correctivo' && !document.getElementById('sistema-corr').value) {
+    toast('⚠ Selecciona el sistema afectado', '#ef4444'); return;
+  }
+
+  if (!feIn) { toast('⚠ Ingresa la fecha de entrada', '#ef4444'); return; }
+  if (!heIn) { toast('⚠ Ingresa la hora de entrada', '#ef4444'); return; }
+
+  const sub = tipo === 'preventivo'
+    ? document.getElementById('plan-prev').value
+    : document.getElementById('sistema-corr').value;
+
+  const rec = {
+    id: Date.now(),
+    montacargas: mc,
+    tipo,
+    sub,
+    fechaEntrada: feIn,
+    horaEntrada: heIn,
+    fechaSalida: document.getElementById('fecha-salida').value,
+    horaSalida: document.getElementById('hora-salida').value,
+    observaciones: document.getElementById('observaciones').value,
+    photo: photoDataUrl
+  };
+
+  records.push(rec);
+  renderRecords();
+  clearForm();
+  toast('✓ Registro guardado');
+  document.getElementById('hdr-count').textContent = records.length;
+}
+
+// ── RENDER ───────────────────────────────────────────────
+function renderRecords() {
+  const list = document.getElementById('records-list');
+  if (!records.length) {
+    list.innerHTML = '<div class="empty-state">Aún no hay registros guardados.<br>Completa el formulario y presiona <strong>Guardar registro</strong>.</div>';
+    document.getElementById('submit-bar').classList.remove('show');
+    return;
+  }
+
+  list.innerHTML = records.map((r, i) => `
+    <div class="record-card ${r.tipo}">
+      <div class="rec-num">${i+1}</div>
+      <div class="rec-info">
+        <strong>MC ${r.montacargas} — ${r.sub}</strong>
+        <span>Entrada: ${r.fechaEntrada} ${r.horaEntrada}${r.fechaSalida ? ' · Salida: '+r.fechaSalida+' '+r.horaSalida : ' · Sin salida registrada'}</span>
+      </div>
+      <span class="rec-badge ${r.tipo === 'preventivo' ? 'badge-prev' : 'badge-corr'}">
+        ${r.tipo === 'preventivo' ? '🔵 Prev' : '🔴 Corr'}
+      </span>
+      ${r.photo
+        ? `<img class="rec-thumb" src="${r.photo}" alt="foto">`
+        : `<div class="no-thumb">📷</div>`}
+      <button class="rec-del" onclick="deleteRec(${r.id})" title="Eliminar">🗑</button>
+    </div>
+  `).join('');
+
+  const bar = document.getElementById('submit-bar');
+  bar.classList.add('show');
+  document.getElementById('submit-desc').textContent =
+    `${records.length} registro${records.length > 1 ? 's' : ''} listo${records.length > 1 ? 's' : ''} para enviar.`;
+}
+
+function deleteRec(id) {
+  const idx = records.findIndex(r => r.id === id);
+  if (idx > -1) records.splice(idx, 1);
+  renderRecords();
+  document.getElementById('hdr-count').textContent = records.length;
+}
+
+// ── CLEAR ────────────────────────────────────────────────
+function clearForm() {
+  document.getElementById('montacargas').value = '';
+  document.getElementById('tipo').value = '';
+  document.getElementById('plan-prev').value = '';
+  document.getElementById('sistema-corr').value = '';
+  document.getElementById('bloque-prev').classList.remove('show');
+  document.getElementById('bloque-corr').classList.remove('show');
+  const n = new Date();
+  document.getElementById('fecha-entrada').valueAsDate = n;
+  document.getElementById('hora-entrada').value = n.toTimeString().slice(0,5);
+  document.getElementById('fecha-salida').value = '';
+  document.getElementById('hora-salida').value = '';
+  document.getElementById('observaciones').value = '';
+  photoDataUrl = null;
+  document.getElementById('photo-input').value = '';
+  document.getElementById('photo-ph').style.display = '';
+  document.getElementById('preview-wrap').classList.remove('show');
+  document.getElementById('photo-zone').classList.remove('filled');
+}
+
+// ── SEND ─────────────────────────────────────────────────
+async function sendAll() {
+  if (!records.length) { toast('No hay registros para enviar', '#ef4444'); return; }
+
+  const btn = document.querySelector('.btn-send');
+  btn.textContent = '⏳ Enviando...';
+  btn.disabled = true;
+
+  // Si no hay URL configurada, simular envío
+  if (APPS_SCRIPT_URL === "PEGA_AQUI_TU_URL_DE_WEB_APP") {
+    await new Promise(r => setTimeout(r, 1500));
+    showSuccess();
+    return;
+  }
+
+  try {
+    for (const rec of records) {
+      await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify(rec)
+      });
+    }
+    showSuccess();
+  } catch (err) {
+    toast('❌ Error al enviar: ' + err.message, '#ef4444');
+    btn.textContent = '📤 Enviar todo';
+    btn.disabled = false;
+  }
+}
+
+function showSuccess() {
+  document.getElementById('form-card').style.display = 'none';
+  document.getElementById('records-list').style.display = 'none';
+  document.getElementById('submit-bar').style.display = 'none';
+  document.getElementById('success-desc').textContent =
+    `${records.length} registro${records.length > 1 ? 's' : ''} enviado${records.length > 1 ? 's' : ''} correctamente.`;
+  document.getElementById('success').classList.add('show');
+}
+
+function resetAll() {
+  records.length = 0;
+  document.getElementById('form-card').style.display = '';
+  document.getElementById('records-list').style.display = '';
+  document.getElementById('success').classList.remove('show');
+  document.getElementById('hdr-count').textContent = 0;
+  renderRecords();
+  clearForm();
+}
+
+// ── TOAST ────────────────────────────────────────────────
+function toast(msg, bg = '#22c55e') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.style.background = bg;
+  el.style.color = bg === '#22c55e' ? '#000' : '#fff';
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2800);
+}
+
+// Init
+renderRecords();
+</script>
+</body>
+</html>
