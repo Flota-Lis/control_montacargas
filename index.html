@@ -524,6 +524,16 @@ canvas { display: none; }
           <option>2000 horas</option>
         </select>
       </div>
+      <div class="row2">
+        <div class="field">
+          <label>Horómetro proyectado (hrs) <span class="req">*</span></label>
+          <input type="text" id="horo-proyectado" placeholder="Ej. 1250" inputmode="decimal">
+        </div>
+        <div class="field">
+          <label>Horómetro ejecutado (hrs) <span class="req">*</span></label>
+          <input type="text" id="horo-ejecutado-prev" placeholder="Ej. 1267" inputmode="decimal">
+        </div>
+      </div>
     </div>
 
     <!-- CORRECTIVO -->
@@ -538,6 +548,10 @@ canvas { display: none; }
           <option>Eléctrico</option>
           <option>Seguridad</option>
         </select>
+      </div>
+      <div class="field">
+        <label>Horómetro ejecutado (hrs) <span class="req">*</span></label>
+        <input type="text" id="horo-ejecutado-corr" placeholder="Ej. 1267" inputmode="decimal">
       </div>
     </div>
 
@@ -746,6 +760,16 @@ function saveRecord() {
     toast('⚠ Selecciona el sistema afectado', '#ef4444'); return;
   }
 
+  if (tipo === 'preventivo' && !document.getElementById('horo-proyectado').value) {
+    toast('⚠ Ingresa el horómetro proyectado', '#ef4444'); return;
+  }
+  if (tipo === 'preventivo' && !document.getElementById('horo-ejecutado-prev').value) {
+    toast('⚠ Ingresa el horómetro ejecutado', '#ef4444'); return;
+  }
+  if (tipo === 'correctivo' && !document.getElementById('horo-ejecutado-corr').value) {
+    toast('⚠ Ingresa el horómetro ejecutado', '#ef4444'); return;
+  }
+
   if (!feIn) { toast('⚠ Ingresa la fecha de entrada', '#ef4444'); return; }
   if (!heIn) { toast('⚠ Ingresa la hora de entrada', '#ef4444'); return; }
 
@@ -753,11 +777,18 @@ function saveRecord() {
     ? document.getElementById('plan-prev').value
     : document.getElementById('sistema-corr').value;
 
+  const horoProyectado = tipo === 'preventivo' ? document.getElementById('horo-proyectado').value : null;
+  const horoEjecutado  = tipo === 'preventivo'
+    ? document.getElementById('horo-ejecutado-prev').value
+    : document.getElementById('horo-ejecutado-corr').value;
+
   const rec = {
     id: Date.now(),
     montacargas: mc,
     tipo,
     sub,
+    horoProyectado,
+    horoEjecutado,
     fechaEntrada: feIn,
     horaEntrada: heIn,
     fechaSalida: document.getElementById('fecha-salida').value,
@@ -788,6 +819,7 @@ function renderRecords() {
       <div class="rec-info">
         <strong>MC ${r.montacargas} — ${r.sub}</strong>
         <span>Entrada: ${r.fechaEntrada} ${r.horaEntrada}${r.fechaSalida ? ' · Salida: '+r.fechaSalida+' '+r.horaSalida : ' · Sin salida registrada'}</span>
+        <span>${r.horoProyectado ? 'Horo. proyectado: '+r.horoProyectado+' hrs · ' : ''}Horo. ejecutado: ${r.horoEjecutado} hrs</span>
       </div>
       <span class="rec-badge ${r.tipo === 'preventivo' ? 'badge-prev' : 'badge-corr'}">
         ${r.tipo === 'preventivo' ? '🔵 Prev' : '🔴 Corr'}
@@ -818,6 +850,9 @@ function clearForm() {
   document.getElementById('tipo').value = '';
   document.getElementById('plan-prev').value = '';
   document.getElementById('sistema-corr').value = '';
+  document.getElementById('horo-proyectado').value = '';
+  document.getElementById('horo-ejecutado-prev').value = '';
+  document.getElementById('horo-ejecutado-corr').value = '';
   document.getElementById('bloque-prev').classList.remove('show');
   document.getElementById('bloque-corr').classList.remove('show');
   const n = new Date();
