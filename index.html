@@ -760,13 +760,13 @@ function saveRecord() {
     toast('⚠ Selecciona el sistema afectado', '#ef4444'); return;
   }
 
-  if (tipo === 'preventivo' && !document.getElementById('horo-proyectado').value) {
+  if (tipo === 'preventivo' && !document.getElementById('horo-proyectado').value.trim()) {
     toast('⚠ Ingresa el horómetro proyectado', '#ef4444'); return;
   }
-  if (tipo === 'preventivo' && !document.getElementById('horo-ejecutado-prev').value) {
+  if (tipo === 'preventivo' && !document.getElementById('horo-ejecutado-prev').value.trim()) {
     toast('⚠ Ingresa el horómetro ejecutado', '#ef4444'); return;
   }
-  if (tipo === 'correctivo' && !document.getElementById('horo-ejecutado-corr').value) {
+  if (tipo === 'correctivo' && !document.getElementById('horo-ejecutado-corr').value.trim()) {
     toast('⚠ Ingresa el horómetro ejecutado', '#ef4444'); return;
   }
 
