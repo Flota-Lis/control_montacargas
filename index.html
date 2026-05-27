@@ -94,7 +94,6 @@ textarea { resize: vertical; min-height: 90px; line-height: 1.6; }
 #preview-wrap { display: none; position: relative; width: 100%; }
 #preview-wrap.show { display: block; }
 #photo-prev { width: 100%; max-height: 280px; object-fit: cover; border-radius: 10px; }
-.wm-badge { position: absolute; bottom: 10px; right: 10px; background: rgba(0,0,0,0.75); color: var(--accent); font-size: 11px; padding: 4px 12px; border-radius: 99px; }
 .rm-photo { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.7); border: none; color: #fff; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; z-index: 3; }
 
 .ticket-card { background: #221a1a; border: 1px solid #422525; border-radius: 12px; padding: 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
@@ -106,7 +105,7 @@ textarea { resize: vertical; min-height: 90px; line-height: 1.6; }
 .btn { padding: 11px 26px; border-radius: 10px; font-family: 'Barlow', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; border: none; transition: all 0.2s; }
 .btn-save { background: linear-gradient(135deg, var(--accent), #d97706); color: #000; font-weight: 800; }
 .btn-save:hover { transform: translateY(-2px); }
-.btn-close-ticket { background: var(--accent2); color: white; font-size: 12px; padding: 8px 14px; border-radius: 8px; }
+.btn-close-ticket { background: var(--accent2); color: white; font-size: 12px; padding: 8px 14px; border-radius: 8px; border: none; cursor: pointer; }
 .btn-close-ticket:hover { background: #dc2626; }
 
 .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px); padding: 12px 24px; border-radius: 10px; font-weight: 700; font-size: 14px; transition: transform 0.3s ease; z-index: 999; }
@@ -131,7 +130,7 @@ canvas { display: none; }
   <div class="role-grid">
     <div class="role-btn" onclick="seleccionarRol('opm')">
       <div class="icon">🧑‍✈️</div>
-      <span>Operador (OPM)</span>
+      <span>Operador / Responsable</span>
     </div>
     <div class="role-btn" onclick="seleccionarRol('tecnico')">
       <div class="icon">🔧</div>
@@ -143,11 +142,25 @@ canvas { display: none; }
 <main id="main-content">
   
   <div id="view-opm" style="display:none;">
-    <div class="section-label">Reportar Novedad en Máquina (OPM)</div>
+    <div class="section-label">Reportar Novedad en Máquina</div>
     <div class="card">
-      <div class="field">
-        <label>Nombre del Operador <span class="req">*</span></label>
-        <input type="text" id="opm-nombre" placeholder="Ej. Carlos Mendoza">
+      <div class="row2">
+        <div class="field">
+          <label>Responsable de la novedad <span class="req">*</span></label>
+          <input type="text" id="opm-nombre" placeholder="Nombre completo">
+        </div>
+        <div class="field">
+          <label>Cargo del responsable <span class="req">*</span></label>
+          <select id="opm-cargo">
+            <option value="">— Seleccionar —</option>
+            <option>Operario montacargas</option>
+            <option>Supervisor</option>
+            <option>Coordinador</option>
+            <option>Auxiliar de flota</option>
+            <option>Auxiliar de seguridad</option>
+            <option>Lider de flota</option>
+          </select>
+        </div>
       </div>
       <div class="row2">
         <div class="field">
@@ -230,7 +243,7 @@ canvas { display: none; }
           <label>Sistema afectado <span class="req">*</span></label>
           <select id="sistema-corr">
             <option value="">— Seleccionar —</option>
-            <option>Hidráulico</option><option>Mecánico</option><option>Eléctrico</option><option>Seguridad</option>
+            <option>Hydráulico</option><option>Mecánico</option><option>Eléctrico</option><option>Seguridad</option>
           </select>
         </div>
         <div class="field">
@@ -283,8 +296,8 @@ canvas { display: none; }
 <canvas id="wm-canvas"></canvas>
 
 <script>
-// ⚠️ REEMPLAZA ESTO CON TU ENLACE DE WEB APP GENERADO AL IMPLEMENTAR NUEVA VERSIÓN:
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyJL-F6vqPjFVqghkXE4HdBYkDaDN1_N1Ugl-GLHAXHQ8BxNBcKQJequsQpKnqHhEc/exec"; 
+// Pega aquí abajo tu enlace largo de Web App de Google Apps Script:
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwz2121vs77BfQDAyn1WjtHkVRc35FEE3DvJhrgibC4E2195fNTWHTFzQ29IbxdC1U/exec"; 
 
 let tokenTecnico = "";
 let photoDataUrl = null;
@@ -336,7 +349,6 @@ function onTipoChange() {
   document.getElementById('bloque-corr').classList.toggle('show', v === 'correctivo');
 }
 
-// PROCESAR FOTOS
 document.getElementById('photo-input').addEventListener('change', e => {
   const f = e.target.files[0];
   if (!f) return;
@@ -374,34 +386,46 @@ function removePhoto(e) {
   document.getElementById('preview-wrap').classList.remove('show');
 }
 
-// ENVÍOS DE FORMULARIOS
 async function guardarTicketOPM() {
   const nombre = document.getElementById('opm-nombre').value.trim();
+  const cargo = document.getElementById('opm-cargo').value;
   const mc = document.getElementById('opm-montacargas').value;
   const novedad = document.getElementById('opm-novedad').value.trim();
 
-  if(!nombre || !mc || !novedad) { toast('⚠ Rellene todos los campos', '#ef4444'); return; }
+  if(!nombre || !cargo || !mc || !novedad) { toast('⚠ Rellene todos los campos', '#ef4444'); return; }
 
   toast('⏳ Enviando...', '#f59e0b');
   try {
-    await fetch(APPS_SCRIPT_URL, {
+    const res = await fetch(APPS_SCRIPT_URL, {
       method: 'POST',
-      body: JSON.stringify({ accion: "crearTicket", id: Date.now(), opm: nombre, montacargas: mc, novedad: novedad })
+      body: JSON.stringify({ accion: "crearTicket", id: Date.now(), opm: nombre, cargo: cargo, montacargas: mc, novedad: novedad })
     });
-    toast('✅ Reporte enviado al técnico.');
-    document.getElementById('opm-nombre').value = '';
-    document.getElementById('opm-montacargas').value = '';
-    document.getElementById('opm-novedad').value = '';
-  } catch(e) { toast('❌ Error al procesar', '#ef4444'); }
+    const result = await res.json();
+    if(result.success) {
+      toast('✅ Reporte enviado al archivo de Novedades.');
+      document.getElementById('opm-nombre').value = '';
+      document.getElementById('opm-cargo').value = '';
+      document.getElementById('opm-montacargas').value = '';
+      document.getElementById('opm-novedad').value = '';
+    } else { toast('❌ Error al procesar', '#ef4444'); }
+  } catch(e) { toast('❌ Error de comunicación', '#ef4444'); }
 }
 
 async function cargarTicketsPendientes() {
   const container = document.getElementById('tickets-container');
   try {
-    const res = await fetch(`${APPS_SCRIPT_URL}?getTickets=pendientes`);
-    const tickets = await res.json();
+    const url = `${APPS_SCRIPT_URL}?getTickets=pendientes`;
+    console.log("Fetching:", url); // Para ver en consola del navegador
     
-    if(!tickets || tickets.length === 0) {
+    const res = await fetch(url);
+    console.log("Status:", res.status);
+    
+    const text = await res.text();
+    console.log("Respuesta raw:", text); // Ver qué llega exactamente
+    
+    const tickets = JSON.parse(text);
+    
+    if (!Array.isArray(tickets) || tickets.length === 0) {
       container.innerHTML = '<p style="color:var(--green); font-size:13px; text-align:center; padding:12px;">✅ No hay novedades pendientes.</p>';
       return;
     }
@@ -409,14 +433,18 @@ async function cargarTicketsPendientes() {
     container.innerHTML = tickets.map(t => `
       <div class="ticket-card" id="ticket-${t.id}">
         <div class="ticket-info">
-          <h4>MC ${t.montacargas} — Reporte Operador</h4>
+          <h4>MC ${t.montacargas} — Falla Reportada</h4>
           <p>"${t.novedad}"</p>
-          <div class="meta">Por: <strong>${t.opm}</strong> | Entrada: ${t.fechaEntrada}</div>
+          <div class="meta">Por: <strong>${t.opm}</strong> (${t.cargo}) | Reporte: ${t.fechaEntrada}</div>
         </div>
-        <button class="btn btn-close-ticket" onclick="cerrarTicket(${t.id})">⚙️ Registrar Salida</button>
+        <button class="btn btn-close-ticket" onclick="cerrarTicket('${t.id}')">⚙️ Registrar Salida</button>
       </div>
     `).join('');
-  } catch(e) { container.innerHTML = '<p style="color:var(--muted); font-size:12px; text-align:center;">Error al cargar tickets.</p>'; }
+    
+  } catch(e) {
+    console.error("Error completo:", e);
+    container.innerHTML = `<p style="color:var(--accent2); font-size:12px; text-align:center;">Error: ${e.message}</p>`;
+  }
 }
 
 async function cerrarTicket(id) {
@@ -429,7 +457,7 @@ async function cerrarTicket(id) {
     });
     const result = await response.json();
     if(result.success) {
-      toast('✅ Ticket cerrado e inactividad calculada.');
+      toast('✅ Ticket cerrado en pestaña Novedades.');
       cargarTicketsPendientes();
     } else { toast('❌ Error de validación', '#ef4444'); }
   } catch(e) { toast('❌ Error en el servidor', '#ef4444'); }
