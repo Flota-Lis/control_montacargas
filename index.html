@@ -297,7 +297,7 @@ canvas { display: none; }
 
 <script>
 // Pega aquí abajo tu enlace largo de Web App de Google Apps Script:
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwz2121vs77BfQDAyn1WjtHkVRc35FEE3DvJhrgibC4E2195fNTWHTFzQ29IbxdC1U/exec"; 
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz0Zd1oPq0Z0SSJqog7PbyVfIF8vVWZDBShJSu1TtxLEl-FUVdpjxYpI7GGoaI32b0/exec"; 
 
 let tokenTecnico = "";
 let photoDataUrl = null;
@@ -398,6 +398,8 @@ async function guardarTicketOPM() {
   try {
     const res = await fetch(APPS_SCRIPT_URL, {
       method: 'POST',
+      // VOLVEMOS A TEXT/PLAIN: Esto elimina el error de CORS de inmediato
+      headers: { 'Content-Type': 'text/plain' }, 
       body: JSON.stringify({ accion: "crearTicket", id: Date.now(), opm: nombre, cargo: cargo, montacargas: mc, novedad: novedad })
     });
     const result = await res.json();
@@ -453,14 +455,17 @@ async function cerrarTicket(id) {
   try {
     const response = await fetch(APPS_SCRIPT_URL, {
       method: "POST",
+      headers: { 'Content-Type': 'text/plain' },   // ← esto faltaba
       body: JSON.stringify({ accion: "cerrarTicket", id: id, clave: tokenTecnico })
     });
     const result = await response.json();
     if(result.success) {
       toast('✅ Ticket cerrado en pestaña Novedades.');
       cargarTicketsPendientes();
-    } else { toast('❌ Error de validación', '#ef4444'); }
-  } catch(e) { toast('❌ Error en el servidor', '#ef4444'); }
+    } else { 
+      toast('❌ ' + (result.error || 'Error de validación'), '#ef4444');  // ← muestra el error real
+    }
+  } catch(e) { toast('❌ Error en el servidor: ' + e.message, '#ef4444'); }
 }
 
 async function guardarRegistroTaller() {
