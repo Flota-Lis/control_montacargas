@@ -347,35 +347,114 @@ function onTipoChange() {
   const v = document.getElementById('tipo').value;
   document.getElementById('bloque-prev').classList.toggle('show', v === 'preventivo');
   document.getElementById('bloque-corr').classList.toggle('show', v === 'correctivo');
+  
+  // SOLUCIÓN HORA DE SALIDA: Cuando se selecciona el tipo de mantenimiento,
+  // si los campos de salida están vacíos, les ponemos la fecha y hora actual por defecto
+  // para que el formulario los capture sí o sí.
+  if (v === 'preventivo' || v === 'correctivo') {
+    const ahora = new Date();
+    
+    if (!document.getElementById('fecha-salida').value) {
+      document.getElementById('fecha-salida').valueAsDate = ahora;
+    }
+    if (!document.getElementById('hora-salida').value) {
+      document.getElementById('hora-salida').value = ahora.toTimeString().slice(0,5);
+    }
+    
+    // Si ya había una foto cargada antes de elegir el tipo, actualizamos su marca de agua
+    if (imagenOriginalLimpia) {
+      applyWatermark();
+    }
+  }
 }
 
+// Escuchar cuando el usuario sube o toma la foto
 document.getElementById('photo-input').addEventListener('change', e => {
   const f = e.target.files[0];
   if (!f) return;
+  
+  toast('⏳ Procesando marca de agua...', '#f59e0b');
+  
   const reader = new FileReader();
-  reader.onload = ev => applyWatermark(ev.target.result);
+  reader.onload = ev => {
+    // Guardamos la imagen limpia en la variable global para poder re-dibujarla si cambian los datos
+    imagenOriginalLimpia = ev.target.result; 
+    
+    // Ejecutamos la marca de agua pasándole los datos actualizados del formulario
+    applyWatermark();
+  };
   reader.readAsDataURL(f);
 });
 
-function applyWatermark(src) {
+// REFRESCO EN TIEMPO REAL: Si el técnico cambia el montacargas o las horas, la marca de agua se actualiza sola
+const camposAmonitorear = ['montacargas', 'fecha-entrada', 'hora-entrada', 'fecha-salida', 'hora-salida'];
+camposAmonitorear.forEach(id => {
+  document.getElementById(id).addEventListener('input', () => {
+    if (imagenOriginalLimpia) {
+      applyWatermark();
+    }
+  });
+});
+
+function applyWatermark() {
+  if (!imagenOriginalLimpia) return;
+
   const canvas = document.getElementById('wm-canvas');
   const ctx = canvas.getContext('2d');
   const img = new Image();
+  
   img.onload = () => {
-    canvas.width = img.width; canvas.height = img.height;
+    canvas.width = img.width; 
+    canvas.height = img.height;
     ctx.drawImage(img, 0, 0);
-    const mc = document.getElementById('montacargas').value || 'MC-???';
-    const fs1 = Math.max(16, img.width * 0.02);
-    ctx.fillStyle = 'rgba(0,0,0,0.7)';
-    ctx.fillRect(0, img.height - (fs1*3), img.width, fs1*3);
-    ctx.font = `bold ${fs1}px Arial`; ctx.fillStyle = '#f59e0b';
-    ctx.fillText(`⚙ MONTACARGAS ${mc}`, 14, img.height - (fs1*1.5));
-    photoDataUrl = canvas.toDataURL('image/jpeg', 0.92);
+    
+    // 1. Obtener valores de entrada (que ya vienen por defecto)
+    const mc = document.getElementById('montacargas').value || 'S/M';
+    const fe = document.getElementById('fecha-entrada').value || '—';
+    const he = document.getElementById('hora-entrada').value || '—';
+    
+    // 2. Capturar los inputs de salida
+    const fs = document.getElementById('fecha-salida').value;
+    const hs = document.getElementById('hora-salida').value;
+    
+    // 3. LÓGICA DE VALIDACIÓN: Si el técnico digitalizó una salida, se usa.
+    // Si no ha puesto nada en la salida, el sistema usa la fecha y hora del sistema en ese instante.
+    let textoTiempoLinea2 = "";
+    if (fs && hs) {
+      textoTiempoLinea2 = `⬇️ ENTRADA: ${fe} (${he})   |   ⬆️ SALIDA: ${fs} (${hs})`;
+    } else {
+      const ahora = new Date();
+      const fechaActual = ahora.toISOString().split('T')[0]; // Formato AAAA-MM-DD igual que los inputs
+      const horaActual = ahora.toTimeString().slice(0,5);     // Formato HH:MM
+      textoTiempoLinea2 = `⬇️ ENTRADA: ${fe} (${he})   |   📆 REGISTRO: ${fechaActual} (${horaActual})`;
+    }
+    
+    // 4. Configurar tamaño dinámico de la tipografía (2.2% del ancho de la imagen)
+    const fs1 = Math.max(14, img.width * 0.022); 
+    
+    // 5. Dibujar la franja negra de fondo (con una opacidad del 75% para que no tape bruscamente)
+    ctx.fillStyle = 'rgba(0,0,0,0.75)';
+    ctx.fillRect(0, img.height - (fs1 * 3.5), img.width, fs1 * 3.5);
+    
+    // 6. Estampar la Línea 1 (Datos de la máquina)
+    ctx.font = `bold ${fs1}px Arial`; 
+    ctx.fillStyle = '#f59e0b'; // Color amarillo de la interfaz
+    ctx.fillText(`⚙️ MONTACARGAS: ${mc}`, 20, img.height - (fs1 * 2.1));
+    
+    // 7. Estampar la Línea 2 (Línea de tiempo dinámica calculada arriba)
+    ctx.font = `${fs1 * 0.9}px Arial`; 
+    ctx.fillStyle = '#f0f2f8'; // Color texto claro
+    ctx.fillText(textoTiempoLinea2, 20, img.height - (fs1 * 0.7));
+    
+    // 8. Convertir el lienzo a Base64 listo para subirse a Google Drive
+    photoDataUrl = canvas.toDataURL('image/jpeg', 0.85); 
+    
+    // Actualizar la vista previa del formulario
     document.getElementById('photo-prev').src = photoDataUrl;
     document.getElementById('photo-ph').style.display = 'none';
     document.getElementById('preview-wrap').classList.add('show');
   };
-  img.src = src;
+  img.src = imagenOriginalLimpia;
 }
 
 function removePhoto(e) {
@@ -539,11 +618,95 @@ async function guardarRegistroTaller() {
   } catch(e) { toast('❌ Error de red', '#ef4444'); }
 }
 
+document.getElementById('horo-ejecutado-prev').addEventListener('blur', function() {
+  const proyectadoInput = document.getElementById('horo-proyectado').value.trim();
+  const ejecutadoInput = this.value.trim();
+
+  if (!proyectadoInput || !ejecutadoInput) return;
+
+  const proyectado = parseInt(proyectadoInput, 10);
+  const ejecutado = parseInt(ejecutadoInput, 10);
+
+  if (!isNaN(proyectado) && !isNaN(ejecutado)) {
+    const diferencia = ejecutado - proyectado;
+
+    // 1. CONTROL INFERIOR (BLOQUEO ESTRICTO): Si le falta demasiado tiempo (Menor a -50)
+    if (diferencia < -50) {
+      const falta = Math.abs(diferencia);
+      alert(`❌ ERROR: No se puede proceder.\n\nLa máquina está fuera de rango para rutina preventiva. Le faltan ${falta} horas para alcanzar el rango permitido (-50 a +50).\n\nEl sistema no permitirá guardar este registro hasta que se corrija.`);
+      
+      this.value = ""; // Borra el dato incorrecto
+      setTimeout(() => this.focus(), 10); // Devuelve el cursor al campo
+      return;
+    } 
+    
+    // 2. CONTROL SUPERIOR (PERMISIVO CON ADVERTENCIA): Si está vencido (Mayor a +50)
+    if (diferencia > 50) {
+      const pasado = diferencia;
+      alert(`⚠️ ADVERTENCIA: Mantenimiento Preventivo Vencido.\n\nEl equipo se ha pasado por +${pasado} horas del límite proyectado.\n\nSe permitirá continuar con el registro porque el mantenimiento es requerido con urgencia.`);
+      
+      toast(`⚠️ Alerta: Preventivo vencido por +${pasado} hrs.`, '#f59e0b');
+      return;
+    }
+
+    // 3. RANGO ÓPTIMO (Entre -50 y +50)
+    toast(`✅ Horómetro en rango óptimo (${diferencia >= 0 ? '+' : ''}${diferencia} hrs)`, '#22c55e');
+  }
+});
+
+// Monitorear si cambian el proyectado después de haber puesto el ejecutado
+document.getElementById('horo-proyectado').addEventListener('change', () => {
+  const ejecutadoInput = document.getElementById('horo-ejecutado-prev').value.trim();
+  if (ejecutadoInput) {
+    document.getElementById('horo-ejecutado-prev').dispatchEvent(new Event('blur'));
+  }
+});
+
+
 function toast(msg, bg = '#22c55e') {
   const el = document.getElementById('toast'); el.textContent = msg; el.style.background = bg;
   el.style.color = bg === '#22c55e' ? '#000' : '#fff'; el.classList.add('show');
   setTimeout(() => el.classList.remove('show'), 2800);
 }
+
+// CONTROL DE HORÓMETROS: Monitorear el Horómetro Ejecutado en Preventivos
+document.getElementById('horo-ejecutado-prev').addEventListener('blur', () => {
+  const proyectadoInput = document.getElementById('horo-proyectado').value.trim();
+  const ejecutadoInput = document.getElementById('horo-ejecutado-prev').value.trim();
+
+  // Si alguno de los dos campos está vacío, no calculamos nada aún
+  if (!proyectadoInput || !ejecutadoInput) return;
+
+  const proyectado = parseInt(proyectadoInput, 10);
+  const ejecutado = parseInt(ejecutadoInput, 10);
+
+  // Validar que ambos sean números válidos
+  if (isNaN(proyectado) || !isNaN(ejecutado)) {
+    const diferencia = ejecutado - proyectado;
+
+    // Rango aceptable: entre -50 y +50
+    if (diferencia < -50) {
+      const falta = Math.abs(diferencia);
+      alert(`⚠️ ATENCIÓN: La máquina NO está en el rango de rutina preventivo.\n\n¡Aún le falta demasiado tiempo! Está ingresando el mantenimiento ${falta} horas antes de lo proyectado.`);
+    } else if (diferencia > 50) {
+      const pasado = diferencia;
+      alert(`⚠️ ATENCIÓN: La máquina NO está en el rango de rutina preventivo.\n\n¡Mantenimiento vencido! Está fuera de rango por +${pasado} horas después de lo proyectado.`);
+    } else {
+      // Si está en el rango óptimo, podemos lanzar un pequeño aviso en el Toast para felicitar al técnico
+      toast(`✅ Horómetro en rango óptimo de rutina (${diferencia >= 0 ? '+' : ''}${diferencia} hrs)`, '#22c55e');
+    }
+  }
+});
+
+// Opcional: Si el técnico digita primero el ejecutado y luego el proyectado, también lo evalúa
+document.getElementById('horo-proyectado').addEventListener('blur', () => {
+  const ejecutadoInput = document.getElementById('horo-ejecutado-prev').value.trim();
+  if (ejecutadoInput) {
+    // Si ya había algo en ejecutado, dispara la misma lógica de validación
+    document.getElementById('horo-ejecutado-prev').dispatchEvent(new Event('blur'));
+  }
+});
+
 </script>
 </body>
 </html>
