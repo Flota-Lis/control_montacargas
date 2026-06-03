@@ -45,8 +45,9 @@ body {
 .header-text h1 { font-family: 'Barlow Condensed', sans-serif; font-size: 24px; font-weight: 800; letter-spacing: 2px; color: var(--accent); line-height: 1; }
 .header-text p { font-size: 12px; color: var(--muted); margin-top: 3px; }
 
-#role-selection { max-width: 500px; margin: 100px auto; padding: 0 16px; text-align: center; }
-.role-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 30px; }
+#role-selection { max-width: 650px; margin: 100px auto; padding: 0 16px; text-align: center; }
+.role-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-top: 30px; }
+@media(max-width:580px){ .role-grid { grid-template-columns: 1fr; } }
 .role-btn {
   background: var(--card); border: 2px solid var(--border); padding: 40px 20px;
   border-radius: 16px; cursor: pointer; transition: all 0.2s;
@@ -79,7 +80,7 @@ textarea { resize: vertical; min-height: 90px; line-height: 1.6; }
 .conditional-block { display: none; animation: fadeUp 0.25s ease; }
 .conditional-block.show { display: block; }
 .type-indicator { display: inline-flex; align-items: center; gap: 6px; padding: 4px 14px; border-radius: 99px; font-size: 12px; font-weight: 700; margin-bottom: 16px; }
-.type-prev { background: rgba(59,130,246,0.15); color: #60a5fa; border: 1px solid rgba(59,130,246,0.3); }
+.type-prev { background: rgba(34,197,94,0.15); color: #4ade80; border: 1px solid rgba(34,197,94,0.3); }
 .type-corr { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
 
 .datetime-group { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px; margin-bottom: 18px; }
@@ -96,8 +97,12 @@ textarea { resize: vertical; min-height: 90px; line-height: 1.6; }
 #photo-prev { width: 100%; max-height: 280px; object-fit: cover; border-radius: 10px; }
 .rm-photo { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.7); border: none; color: #fff; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; z-index: 3; }
 
-.ticket-card { background: #221a1a; border: 1px solid #422525; border-radius: 12px; padding: 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
-.ticket-info h4 { font-size: 15px; color: #f87171; font-weight: 700; }
+.ticket-card { border: 1.5px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; transition: all 0.2s; }
+.ticket-card.card-corr { background: #221414; border-color: #5c2626; }
+.ticket-card.card-prev { background: #132219; border-color: #1b5231; }
+.ticket-info h4 { font-size: 15px; font-weight: 700; }
+.ticket-card.card-corr h4 { color: #f87171; }
+.ticket-card.card-prev h4 { color: #4ade80; }
 .ticket-info p { font-size: 13px; color: var(--sub); margin-top: 4px; }
 .ticket-info .meta { font-size: 11px; color: var(--muted); margin-top: 6px; }
 
@@ -105,8 +110,12 @@ textarea { resize: vertical; min-height: 90px; line-height: 1.6; }
 .btn { padding: 11px 26px; border-radius: 10px; font-family: 'Barlow', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; border: none; transition: all 0.2s; }
 .btn-save { background: linear-gradient(135deg, var(--accent), #d97706); color: #000; font-weight: 800; }
 .btn-save:hover { transform: translateY(-2px); }
-.btn-close-ticket { background: var(--accent2); color: white; font-size: 12px; padding: 8px 14px; border-radius: 8px; border: none; cursor: pointer; }
-.btn-close-ticket:hover { background: #dc2626; }
+
+.btn-load-ticket { background: var(--surface); color: var(--text); font-size: 12px; padding: 10px 16px; border-radius: 8px; border: 1.5px solid var(--border); cursor: pointer; font-weight: 600; transition: all 0.2s; }
+.ticket-card.card-corr .btn-load-ticket { border-color: #ef4444; color: #f87171; }
+.ticket-card.card-corr .btn-load-ticket:hover { background: #ef4444; color: #000; }
+.ticket-card.card-prev .btn-load-ticket { border-color: #22c55e; color: #4ade80; }
+.ticket-card.card-prev .btn-load-ticket:hover { background: #22c55e; color: #000; }
 
 .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px); padding: 12px 24px; border-radius: 10px; font-weight: 700; font-size: 14px; transition: transform 0.3s ease; z-index: 999; }
 .toast.show { transform: translateX(-50%) translateY(0); }
@@ -132,6 +141,10 @@ canvas { display: none; }
       <div class="icon">🧑‍✈️</div>
       <span>Operador / Responsable</span>
     </div>
+    <div class="role-btn" onclick="seleccionarRol('admin')">
+      <div class="icon">💼</div>
+      <span>Administrador</span>
+    </div>
     <div class="role-btn" onclick="seleccionarRol('tecnico')">
       <div class="icon">🔧</div>
       <span>Técnico</span>
@@ -141,8 +154,9 @@ canvas { display: none; }
 
 <main id="main-content">
   
+  <!-- VISTA OPERARIO -->
   <div id="view-opm" style="display:none;">
-    <div class="section-label">Reportar Novedad en Máquina</div>
+    <div class="section-label">Reportar Novedad en Máquina (Correctivo)</div>
     <div class="card">
       <div class="row2">
         <div class="field">
@@ -187,15 +201,60 @@ canvas { display: none; }
     </div>
   </div>
 
+  <!-- VISTA ADMINISTRADOR -->
+  <div id="view-admin" style="display:none;">
+    <div class="section-label" style="color:var(--blue)">Programar Mantenimiento Preventivo</div>
+    <div class="card">
+      <div class="row2">
+        <div class="field">
+          <label>Administrador / Planeador <span class="req">*</span></label>
+          <input type="text" id="admin-nombre" placeholder="Nombre completo">
+        </div>
+        <div class="field">
+          <label>Montacargas <span class="req">*</span></label>
+          <select id="admin-montacargas">
+            <option value="">— Seleccionar —</option>
+            <option>561</option><option>562</option><option>567</option><option>603</option>
+            <option>681</option><option>761</option><option>832</option><option>855</option>
+            <option>860</option><option>838</option>
+          </select>
+        </div>
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label>Plan de Mantenimiento <span class="req">*</span></label>
+          <select id="admin-plan">
+            <option value="">— Seleccionar —</option>
+            <option value="250 horas">250 horas</option>
+            <option value="1000 horas">1000 horas</option>
+            <option value="2000 horas">2000 horas</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Horómetro Proyectado <span class="req">*</span></label>
+          <input type="text" id="admin-horo-proyectado" placeholder="Ej. 2500">
+        </div>
+      </div>
+      <div class="field">
+        <label>Observaciones o Rutinas Adicionales</label>
+        <textarea id="admin-observaciones" placeholder="Detalles u observaciones específicas para el preventivo..."></textarea>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-save" style="background:linear-gradient(135deg, var(--blue), #1d4ed8); color:white;" onclick="guardarTicketAdmin()">📅 Programar Preventivo</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- VISTA TÉCNICO -->
   <div id="view-tecnico" style="display:none;">
     
-    <div class="section-label" style="color:var(--accent2)">⚠️ Tickets Reportados por OPM (Pendientes de Salida)</div>
+    <div class="section-label" style="color:var(--accent)">⚠️ Tickets Pendientes en Plataforma (Por Ejecutar)</div>
     <div id="tickets-container">
       <p style="color:var(--muted); font-size:13px; text-align:center; padding:12px;">Buscando reportes en la base de datos...</p>
     </div>
 
     <div class="section-label">Registrar Trabajo de Taller</div>
-    <div class="card">
+    <div class="card" id="formulario-registro-taller">
       <div class="row2">
         <div class="field">
           <label>Montacargas <span class="req">*</span></label>
@@ -217,12 +276,14 @@ canvas { display: none; }
       </div>
 
       <div class="conditional-block" id="bloque-prev">
-        <div class="type-indicator type-prev">🔵 PREVENTIVO</div>
+        <div class="type-indicator type-prev">🟢 PREVENTIVO</div>
         <div class="field">
           <label>Plan de mantenimiento <span class="req">*</span></label>
           <select id="plan-prev">
             <option value="">— Seleccionar —</option>
-            <option>250 horas</option><option>1000 horas</option><option>2000 horas</option>
+            <option value="250 horas">250 horas</option>
+            <option value="1000 horas">1000 horas</option>
+            <option value="2000 horas">2000 horas</option>
           </select>
         </div>
         <div class="row2">
@@ -286,7 +347,7 @@ canvas { display: none; }
       </div>
 
       <div class="form-actions">
-        <button class="btn btn-save" onclick="guardarRegistroTaller()">Guardar Registro →</button>
+        <button class="btn btn-save" onclick="guardarRegistroTaller()">Guardar Registro y Cerrar Ticket →</button>
       </div>
     </div>
   </div>
@@ -296,13 +357,24 @@ canvas { display: none; }
 <canvas id="wm-canvas"></canvas>
 
 <script>
-// Pega aquí abajo tu enlace largo de Web App de Google Apps Script:
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz0Zd1oPq0Z0SSJqog7PbyVfIF8vVWZDBShJSu1TtxLEl-FUVdpjxYpI7GGoaI32b0/exec"; 
 
 let tokenTecnico = "";
 let photoDataUrl = null;
+let imagenOriginalLimpia = null;
+let ticketsCargadosEnMemoria = []; 
+let idTicketActivoEnFormulario = null; 
 
 async function seleccionarRol(rol) {
+  if (rol === 'admin') {
+    const pass = prompt("Clave de acceso Administrador:");
+    if (!pass) return;
+    if (pass !== "admin123") {
+      toast("❌ Clave de Admin Incorrecta.", "#ef4444");
+      return;
+    }
+  }
+
   if (rol === 'tecnico') {
     const pass = prompt("Clave de acceso técnico:");
     if (!pass) return;
@@ -328,10 +400,17 @@ async function seleccionarRol(rol) {
   document.getElementById('role-selection').style.display = 'none';
   document.getElementById('main-content').style.display = 'block';
 
+  document.getElementById('view-opm').style.display = 'none';
+  document.getElementById('view-admin').style.display = 'none';
+  document.getElementById('view-tecnico').style.display = 'none';
+
   if (rol === 'opm') {
     document.getElementById('header-subtitle').textContent = "Módulo OPM · Reporte de Fallas";
     document.getElementById('view-opm').style.display = 'block';
     document.getElementById('opm-fecha-vista').value = new Date().toLocaleString("es-CO");
+  } else if (rol === 'admin') {
+    document.getElementById('header-subtitle').textContent = "Módulo Administrador · Programación Preventiva";
+    document.getElementById('view-admin').style.display = 'block';
   } else {
     document.getElementById('header-subtitle').textContent = "Módulo Técnico · Control Total";
     document.getElementById('view-tecnico').style.display = 'block';
@@ -348,45 +427,87 @@ function onTipoChange() {
   document.getElementById('bloque-prev').classList.toggle('show', v === 'preventivo');
   document.getElementById('bloque-corr').classList.toggle('show', v === 'correctivo');
   
-  // SOLUCIÓN HORA DE SALIDA: Cuando se selecciona el tipo de mantenimiento,
-  // si los campos de salida están vacíos, les ponemos la fecha y hora actual por defecto
-  // para que el formulario los capture sí o sí.
   if (v === 'preventivo' || v === 'correctivo') {
     const ahora = new Date();
-    
     if (!document.getElementById('fecha-salida').value) {
       document.getElementById('fecha-salida').valueAsDate = ahora;
     }
     if (!document.getElementById('hora-salida').value) {
       document.getElementById('hora-salida').value = ahora.toTimeString().slice(0,5);
     }
-    
-    // Si ya había una foto cargada antes de elegir el tipo, actualizamos su marca de agua
     if (imagenOriginalLimpia) {
       applyWatermark();
     }
   }
 }
 
-// Escuchar cuando el usuario sube o toma la foto
+// ── EXTRACCIÓN INTELIGENTE MEDIANTE TEXTO (REGEX) ──────────────────────────
+function autocompletarFormularioTecnico(idTicket) {
+  const ticket = ticketsCargadosEnMemoria.find(t => t.id == idTicket);
+  if (!ticket) return;
+
+  idTicketActivoEnFormulario = idTicket;
+  document.getElementById('montacargas').value = ticket.montacargas;
+
+  const esPreventivo = ticket.tipoTicket === 'preventivo' || (ticket.cargo && ticket.cargo.toLowerCase() === 'administrador');
+
+  if (esPreventivo) {
+    document.getElementById('tipo').value = 'preventivo';
+    onTipoChange();
+    
+    let planDetectado = "250 horas"; // Valor por defecto
+    let horoProyectadoDetectado = "";
+
+    const desc = ticket.novedad || "";
+
+    // 1. Extraer el plan (Busca números antes de la palabra horas)
+    if (desc.includes("1000 horas") || desc.includes("1000")) {
+      planDetectado = "1000 horas";
+    } else if (desc.includes("2000 horas") || desc.includes("2000")) {
+      planDetectado = "2000 horas";
+    } else if (desc.includes("250 horas") || desc.includes("250")) {
+      planDetectado = "250 horas";
+    }
+
+    // 2. Extraer el horómetro proyectado usando Expresiones Regulares (Detecta números de 3 o 4 cifras aislados)
+    const matches = desc.match(/\b\d{3,5}\b/g);
+    if (matches) {
+      // Filtramos para ignorar los números cíclicos de la rutina estándar (250, 1000, 2000)
+      const candidatos = matches.filter(num => num !== "250" && num !== "1000" && num !== "2000");
+      if (candidatos.length > 0) {
+        horoProyectadoDetectado = candidatos[0]; // Toma la cifra real acumulada del odómetro
+      }
+    }
+
+    document.getElementById('plan-prev').value = planDetectado;
+    document.getElementById('horo-proyectado').value = horoProyectadoDetectado;
+    document.getElementById('horo-ejecutado-prev').value = ''; 
+    document.getElementById('observaciones').value = `[Preventivo Programado por Admin]: ${desc}`;
+  } else {
+    document.getElementById('tipo').value = 'correctivo';
+    onTipoChange();
+    
+    document.getElementById('sistema-corr').value = ''; 
+    document.getElementById('horo-ejecutado-corr').value = '';
+    document.getElementById('observaciones').value = `[Falla Reportada por OPM]: ${ticket.novedad || ''}`;
+  }
+
+  toast(`📋 Datos del MC ${ticket.montacargas} cargados con éxito.`, '#3b82f6');
+  document.getElementById('formulario-registro-taller').scrollIntoView({ behavior: 'smooth' });
+}
+
 document.getElementById('photo-input').addEventListener('change', e => {
   const f = e.target.files[0];
   if (!f) return;
-  
   toast('⏳ Procesando marca de agua...', '#f59e0b');
-  
   const reader = new FileReader();
   reader.onload = ev => {
-    // Guardamos la imagen limpia en la variable global para poder re-dibujarla si cambian los datos
     imagenOriginalLimpia = ev.target.result; 
-    
-    // Ejecutamos la marca de agua pasándole los datos actualizados del formulario
     applyWatermark();
   };
   reader.readAsDataURL(f);
 });
 
-// REFRESCO EN TIEMPO REAL: Si el técnico cambia el montacargas o las horas, la marca de agua se actualiza sola
 const camposAmonitorear = ['montacargas', 'fecha-entrada', 'hora-entrada', 'fecha-salida', 'hora-salida'];
 camposAmonitorear.forEach(id => {
   document.getElementById(id).addEventListener('input', () => {
@@ -408,48 +529,35 @@ function applyWatermark() {
     canvas.height = img.height;
     ctx.drawImage(img, 0, 0);
     
-    // 1. Obtener valores de entrada (que ya vienen por defecto)
     const mc = document.getElementById('montacargas').value || 'S/M';
     const fe = document.getElementById('fecha-entrada').value || '—';
     const he = document.getElementById('hora-entrada').value || '—';
-    
-    // 2. Capturar los inputs de salida
     const fs = document.getElementById('fecha-salida').value;
     const hs = document.getElementById('hora-salida').value;
     
-    // 3. LÓGICA DE VALIDACIÓN: Si el técnico digitalizó una salida, se usa.
-    // Si no ha puesto nada en la salida, el sistema usa la fecha y hora del sistema en ese instante.
     let textoTiempoLinea2 = "";
     if (fs && hs) {
       textoTiempoLinea2 = `⬇️ ENTRADA: ${fe} (${he})   |   ⬆️ SALIDA: ${fs} (${hs})`;
     } else {
       const ahora = new Date();
-      const fechaActual = ahora.toISOString().split('T')[0]; // Formato AAAA-MM-DD igual que los inputs
-      const horaActual = ahora.toTimeString().slice(0,5);     // Formato HH:MM
+      const fechaActual = Privacy = ahora.toISOString().split('T')[0];
+      const horaActual = ahora.toTimeString().slice(0,5);     
       textoTiempoLinea2 = `⬇️ ENTRADA: ${fe} (${he})   |   📆 REGISTRO: ${fechaActual} (${horaActual})`;
     }
     
-    // 4. Configurar tamaño dinámico de la tipografía (2.2% del ancho de la imagen)
     const fs1 = Math.max(14, img.width * 0.022); 
-    
-    // 5. Dibujar la franja negra de fondo (con una opacidad del 75% para que no tape bruscamente)
     ctx.fillStyle = 'rgba(0,0,0,0.75)';
     ctx.fillRect(0, img.height - (fs1 * 3.5), img.width, fs1 * 3.5);
     
-    // 6. Estampar la Línea 1 (Datos de la máquina)
     ctx.font = `bold ${fs1}px Arial`; 
-    ctx.fillStyle = '#f59e0b'; // Color amarillo de la interfaz
+    ctx.fillStyle = '#f59e0b'; 
     ctx.fillText(`⚙️ MONTACARGAS: ${mc}`, 20, img.height - (fs1 * 2.1));
     
-    // 7. Estampar la Línea 2 (Línea de tiempo dinámica calculada arriba)
     ctx.font = `${fs1 * 0.9}px Arial`; 
-    ctx.fillStyle = '#f0f2f8'; // Color texto claro
+    ctx.fillStyle = '#f0f2f8'; 
     ctx.fillText(textoTiempoLinea2, 20, img.height - (fs1 * 0.7));
     
-    // 8. Convertir el lienzo a Base64 listo para subirse a Google Drive
     photoDataUrl = canvas.toDataURL('image/jpeg', 0.85); 
-    
-    // Actualizar la vista previa del formulario
     document.getElementById('photo-prev').src = photoDataUrl;
     document.getElementById('photo-ph').style.display = 'none';
     document.getElementById('preview-wrap').classList.add('show');
@@ -477,9 +585,16 @@ async function guardarTicketOPM() {
   try {
     const res = await fetch(APPS_SCRIPT_URL, {
       method: 'POST',
-      // VOLVEMOS A TEXT/PLAIN: Esto elimina el error de CORS de inmediato
       headers: { 'Content-Type': 'text/plain' }, 
-      body: JSON.stringify({ accion: "crearTicket", id: Date.now(), opm: nombre, cargo: cargo, montacargas: mc, novedad: novedad })
+      body: JSON.stringify({ 
+        accion: "crearTicket", 
+        id: Date.now(), 
+        opm: nombre, 
+        cargo: cargo, 
+        montacargas: mc, 
+        novedad: novedad,
+        tipoTicket: "correctivo"
+      })
     });
     const result = await res.json();
     if(result.success) {
@@ -492,59 +607,94 @@ async function guardarTicketOPM() {
   } catch(e) { toast('❌ Error de comunicación', '#ef4444'); }
 }
 
+async function guardarTicketAdmin() {
+  const nombre = document.getElementById('admin-nombre').value.trim();
+  const mc = document.getElementById('admin-montacargas').value;
+  const plan = document.getElementById('admin-plan').value;
+  const horoProj = document.getElementById('admin-horo-proyectado').value.trim();
+  const obs = document.getElementById('admin-observaciones').value.trim();
+
+  if(!nombre || !mc || !plan || !horoProj) { toast('⚠ Rellene todos los campos obligatorios', '#ef4444'); return; }
+
+  toast('⏳ Programando Preventivo...', '#f59e0b');
+  try {
+    const res = await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' }, 
+      body: JSON.stringify({ 
+        accion: "crearTicket", 
+        id: Date.now(), 
+        opm: nombre, 
+        cargo: "Administrador", 
+        montacargas: mc, 
+        // Estructura de texto para que sea reversible
+        novedad: `Rutina Preventiva programada para ${horoProj} hrs - Ciclo de ${plan}. ${obs}`,
+        tipoTicket: "preventivo"
+      })
+    });
+    const result = await res.json();
+    if(result.success) {
+      toast('✅ Mantenimiento Preventivo registrado.');
+      document.getElementById('admin-nombre').value = '';
+      document.getElementById('admin-montacargas').value = '';
+      document.getElementById('admin-plan').value = '';
+      document.getElementById('admin-horo-proyectado').value = '';
+      document.getElementById('admin-observaciones').value = '';
+    } else { toast('❌ Error al procesar', '#ef4444'); }
+  } catch(e) { toast('❌ Error de comunicación', '#ef4444'); }
+}
+
 async function cargarTicketsPendientes() {
   const container = document.getElementById('tickets-container');
   try {
     const url = `${APPS_SCRIPT_URL}?getTickets=pendientes`;
-    console.log("Fetching:", url); // Para ver en consola del navegador
-    
     const res = await fetch(url);
-    console.log("Status:", res.status);
-    
     const text = await res.text();
-    console.log("Respuesta raw:", text); // Ver qué llega exactamente
-    
     const tickets = JSON.parse(text);
     
     if (!Array.isArray(tickets) || tickets.length === 0) {
-      container.innerHTML = '<p style="color:var(--green); font-size:13px; text-align:center; padding:12px;">✅ No hay novedades pendientes.</p>';
+      ticketsCargadosEnMemoria = [];
+      container.innerHTML = '<p style="color:var(--green); font-size:13px; text-align:center; padding:12px;">✅ No hay novedades pendientes en plataforma.</p>';
       return;
     }
     
-    container.innerHTML = tickets.map(t => `
-      <div class="ticket-card" id="ticket-${t.id}">
-        <div class="ticket-info">
-          <h4>MC ${t.montacargas} — Falla Reportada</h4>
-          <p>"${t.novedad}"</p>
-          <div class="meta">Por: <strong>${t.opm}</strong> (${t.cargo}) | Reporte: ${t.fechaEntrada}</div>
+    ticketsCargadosEnMemoria = tickets; 
+    
+    container.innerHTML = tickets.map(t => {
+      const esPrev = t.tipoTicket === 'preventivo' || (t.cargo && t.cargo.toLowerCase() === 'administrador') || (t.novedad && t.novedad.toLowerCase().includes("preventiva"));
+      
+      // Forzar asignación correcta en memoria
+      t.tipoTicket = esPrev ? 'preventivo' : 'correctivo';
+
+      const claseCard = esPrev ? 'card-prev' : 'card-corr';
+      const tagTipo = esPrev ? '🟢 RUTINA PREVENTIVA' : '🔴 FALLA DETECTADA';
+      
+      return `
+        <div class="ticket-card ${claseCard}" id="ticket-${t.id}">
+          <div class="ticket-info">
+            <h4>MC ${t.montacargas} — ${tagTipo}</h4>
+            <p>"${t.novedad}"</p>
+            <div class="meta">Por: <strong>${t.opm}</strong> (${t.cargo}) | Reporte: ${t.fechaEntrada || 'Reciente'}</div>
+          </div>
+          <button class="btn btn-load-ticket" onclick="autocompletarFormularioTecnico('${t.id}')">📋 Cargar en Formulario</button>
         </div>
-        <button class="btn btn-close-ticket" onclick="cerrarTicket('${t.id}')">⚙️ Registrar Salida</button>
-      </div>
-    `).join('');
+      `;
+    }).join('');
     
   } catch(e) {
     console.error("Error completo:", e);
-    container.innerHTML = `<p style="color:var(--accent2); font-size:12px; text-align:center;">Error: ${e.message}</p>`;
+    container.innerHTML = `<p style="color:var(--accent2); font-size:12px; text-align:center;">Error al sincronizar tickets: ${e.message}</p> Warmup`;
   }
 }
 
-async function cerrarTicket(id) {
-  if(!confirm("¿Deseas cerrar esta falla y registrar la salida?")) return;
-  toast('⏳ Guardando salida...', '#f59e0b');
+async function removerTicketSujeto(id) {
   try {
-    const response = await fetch(APPS_SCRIPT_URL, {
+    await fetch(APPS_SCRIPT_URL, {
       method: "POST",
-      headers: { 'Content-Type': 'text/plain' },   // ← esto faltaba
+      headers: { 'Content-Type': 'text/plain' },
       body: JSON.stringify({ accion: "cerrarTicket", id: id, clave: tokenTecnico })
     });
-    const result = await response.json();
-    if(result.success) {
-      toast('✅ Ticket cerrado en pestaña Novedades.');
-      cargarTicketsPendientes();
-    } else { 
-      toast('❌ ' + (result.error || 'Error de validación'), '#ef4444');  // ← muestra el error real
-    }
-  } catch(e) { toast('❌ Error en el servidor: ' + e.message, '#ef4444'); }
+  } catch(e) { console.error("Error al remover ticket procesado", e); }
 }
 
 async function guardarRegistroTaller() {
@@ -586,17 +736,27 @@ async function guardarRegistroTaller() {
     photo: photoDataUrl
   };
 
-  toast('⏳ Guardando...', '#f59e0b');
+  toast('⏳ Guardando y cerrando pendientes...', '#f59e0b');
   try {
     const res = await fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
     const r = await res.json();
     if(r.success) {
-      toast('✅ Guardado en fila ' + r.row);
       
+      if (idTicketActivoEnFormulario) {
+        await removerTicketSujeto(idTicketActivoEnFormulario);
+        toast('✅ Registro guardado y ticket removido con éxito.');
+      } else {
+        const ticketRespaldado = ticketsCargadosEnMemoria.find(t => t.montacargas == mc);
+        if (ticketRespaldado) {
+          await removerTicketSujeto(ticketRespaldado.id);
+        }
+        toast('✅ Registro guardado con éxito.');
+      }
+
+      idTicketActivoEnFormulario = null; 
       document.getElementById('montacargas').value = '';
       document.getElementById('tipo').value = '';
       document.getElementById('observaciones').value = '';
-      
       document.getElementById('plan-prev').value = '';
       document.getElementById('horo-proyectado').value = '';
       document.getElementById('horo-ejecutado-prev').value = '';
@@ -605,7 +765,6 @@ async function guardarRegistroTaller() {
       
       document.getElementById('bloque-prev').classList.remove('show');
       document.getElementById('bloque-corr').classList.remove('show');
-      
       document.getElementById('fecha-salida').value = '';
       document.getElementById('hora-salida').value = '';
       
@@ -614,6 +773,7 @@ async function guardarRegistroTaller() {
       document.getElementById('hora-entrada').value = n.toTimeString().slice(0,5);
       
       removePhoto();
+      cargarTicketsPendientes(); 
     } else { toast('❌ Error: ' + r.error, '#ef4444'); }
   } catch(e) { toast('❌ Error de red', '#ef4444'); }
 }
@@ -630,31 +790,25 @@ document.getElementById('horo-ejecutado-prev').addEventListener('blur', function
   if (!isNaN(proyectado) && !isNaN(ejecutado)) {
     const diferencia = ejecutado - proyectado;
 
-    // 1. CONTROL INFERIOR (BLOQUEO ESTRICTO): Si le falta demasiado tiempo (Menor a -50)
     if (diferencia < -50) {
       const falta = Math.abs(diferencia);
       alert(`❌ ERROR: No se puede proceder.\n\nLa máquina está fuera de rango para rutina preventiva. Le faltan ${falta} horas para alcanzar el rango permitido (-50 a +50).\n\nEl sistema no permitirá guardar este registro hasta que se corrija.`);
-      
-      this.value = ""; // Borra el dato incorrecto
-      setTimeout(() => this.focus(), 10); // Devuelve el cursor al campo
+      this.value = ""; 
+      setTimeout(() => this.focus(), 10); 
       return;
     } 
     
-    // 2. CONTROL SUPERIOR (PERMISIVO CON ADVERTENCIA): Si está vencido (Mayor a +50)
     if (diferencia > 50) {
       const pasado = diferencia;
       alert(`⚠️ ADVERTENCIA: Mantenimiento Preventivo Vencido.\n\nEl equipo se ha pasado por +${pasado} horas del límite proyectado.\n\nSe permitirá continuar con el registro porque el mantenimiento es requerido con urgencia.`);
-      
       toast(`⚠️ Alerta: Preventivo vencido por +${pasado} hrs.`, '#f59e0b');
       return;
     }
 
-    // 3. RANGO ÓPTIMO (Entre -50 y +50)
     toast(`✅ Horómetro en rango óptimo (${diferencia >= 0 ? '+' : ''}${diferencia} hrs)`, '#22c55e');
   }
 });
 
-// Monitorear si cambian el proyectado después de haber puesto el ejecutado
 document.getElementById('horo-proyectado').addEventListener('change', () => {
   const ejecutadoInput = document.getElementById('horo-ejecutado-prev').value.trim();
   if (ejecutadoInput) {
@@ -662,51 +816,11 @@ document.getElementById('horo-proyectado').addEventListener('change', () => {
   }
 });
 
-
 function toast(msg, bg = '#22c55e') {
   const el = document.getElementById('toast'); el.textContent = msg; el.style.background = bg;
   el.style.color = bg === '#22c55e' ? '#000' : '#fff'; el.classList.add('show');
   setTimeout(() => el.classList.remove('show'), 2800);
 }
-
-// CONTROL DE HORÓMETROS: Monitorear el Horómetro Ejecutado en Preventivos
-document.getElementById('horo-ejecutado-prev').addEventListener('blur', () => {
-  const proyectadoInput = document.getElementById('horo-proyectado').value.trim();
-  const ejecutadoInput = document.getElementById('horo-ejecutado-prev').value.trim();
-
-  // Si alguno de los dos campos está vacío, no calculamos nada aún
-  if (!proyectadoInput || !ejecutadoInput) return;
-
-  const proyectado = parseInt(proyectadoInput, 10);
-  const ejecutado = parseInt(ejecutadoInput, 10);
-
-  // Validar que ambos sean números válidos
-  if (isNaN(proyectado) || !isNaN(ejecutado)) {
-    const diferencia = ejecutado - proyectado;
-
-    // Rango aceptable: entre -50 y +50
-    if (diferencia < -50) {
-      const falta = Math.abs(diferencia);
-      alert(`⚠️ ATENCIÓN: La máquina NO está en el rango de rutina preventivo.\n\n¡Aún le falta demasiado tiempo! Está ingresando el mantenimiento ${falta} horas antes de lo proyectado.`);
-    } else if (diferencia > 50) {
-      const pasado = diferencia;
-      alert(`⚠️ ATENCIÓN: La máquina NO está en el rango de rutina preventivo.\n\n¡Mantenimiento vencido! Está fuera de rango por +${pasado} horas después de lo proyectado.`);
-    } else {
-      // Si está en el rango óptimo, podemos lanzar un pequeño aviso en el Toast para felicitar al técnico
-      toast(`✅ Horómetro en rango óptimo de rutina (${diferencia >= 0 ? '+' : ''}${diferencia} hrs)`, '#22c55e');
-    }
-  }
-});
-
-// Opcional: Si el técnico digita primero el ejecutado y luego el proyectado, también lo evalúa
-document.getElementById('horo-proyectado').addEventListener('blur', () => {
-  const ejecutadoInput = document.getElementById('horo-ejecutado-prev').value.trim();
-  if (ejecutadoInput) {
-    // Si ya había algo en ejecutado, dispara la misma lógica de validación
-    document.getElementById('horo-ejecutado-prev').dispatchEvent(new Event('blur'));
-  }
-});
-
 </script>
 </body>
 </html>
